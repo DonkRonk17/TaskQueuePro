@@ -1,0 +1,174 @@
+TASKQUEUEPRO CHEAT SHEET
+=========================
+
+QUICK START
+-----------
+from taskqueuepro import TaskQueuePro
+queue = TaskQueuePro()
+
+ADD TASKS
+---------
+# Basic
+task_id = queue.add_task("Task title", assigned_to="ATLAS")
+
+# With priority
+task_id = queue.add_task("Urgent task", assigned_to="ATLAS", priority="HIGH")
+
+# With schedule
+from datetime import datetime, timedelta
+tomorrow = datetime.now() + timedelta(days=1)
+task_id = queue.add_task("Future task", schedule_at=tomorrow)
+
+# With metadata
+task_id = queue.add_task(
+    "Complex task",
+    metadata={"project": "Q-Mode", "github": "#123"}
+)
+
+QUERY TASKS
+-----------
+# Get my pending tasks
+tasks = queue.get_pending(assigned_to="ATLAS")
+
+# Get by priority
+tasks = queue.get_tasks(priority="HIGH")
+
+# Get by status
+tasks = queue.get_tasks(status="IN_PROGRESS")
+
+# Get scheduled (ready to run)
+tasks = queue.get_scheduled_tasks()
+
+# Get specific task
+task = queue.get_task(task_id)
+
+UPDATE TASKS
+------------
+# Start task
+queue.start_task(task_id)
+
+# Complete task
+queue.complete_task(task_id)
+
+# Fail task
+queue.fail_task(task_id, reason="Error message")
+
+# Cancel task
+queue.cancel_task(task_id)
+
+STATISTICS
+----------
+# Overall stats
+stats = queue.get_stats()
+print(f"Total: {stats['total']}, Completed: {stats['completed']}")
+
+# Agent stats
+stats = queue.get_agent_stats("ATLAS")
+print(f"Pending: {stats['pending']}, Completed: {stats['completed']}")
+
+PRIORITY LEVELS
+---------------
+CRITICAL (4)  - Drop everything, do now
+HIGH (3)      - Do today
+NORMAL (2)    - Default priority
+LOW (1)       - Do when time permits
+
+TASK STATUS
+-----------
+PENDING       - Not started
+IN_PROGRESS   - Currently working
+COMPLETED     - Finished successfully
+FAILED        - Failed with error
+CANCELLED     - No longer needed
+
+COMMON PATTERNS
+---------------
+# Morning standup
+my_tasks = queue.get_pending(assigned_to="ATLAS")
+for task in sorted(my_tasks, key=lambda t: t.priority, reverse=True):
+    print(f"[{task.priority}] {task.title}")
+
+# Work through tasks
+for task in queue.get_pending(assigned_to="ATLAS"):
+    queue.start_task(task.task_id)
+    # ... do work ...
+    queue.complete_task(task.task_id)
+
+# Check scheduled tasks
+ready = queue.get_scheduled_tasks()
+for task in ready:
+    print(f"Ready: {task.title}")
+
+# Team workload
+for agent in ["ATLAS", "BOLT", "CLIO"]:
+    stats = queue.get_agent_stats(agent)
+    print(f"{agent}: {stats['pending']} pending")
+
+COMMAND LINE
+------------
+# Add task
+python taskqueuepro.py add "Task" --assign ATLAS --priority HIGH
+
+# List tasks
+python taskqueuepro.py list --status pending
+python taskqueuepro.py list --assign ATLAS
+python taskqueuepro.py list --priority HIGH
+
+# Complete task
+python taskqueuepro.py complete task_abc123
+
+# Show task details
+python taskqueuepro.py show task_abc123
+
+# Statistics
+python taskqueuepro.py stats
+python taskqueuepro.py stats --agent ATLAS
+
+# Export
+python taskqueuepro.py export --format json
+
+DATABASE
+--------
+Default location: D:/BEACON_HQ/TASK_QUEUE/taskqueue.db
+
+Custom location:
+queue = TaskQueuePro(db_path=Path("/custom/path/tasks.db"))
+
+INTEGRATION
+-----------
+# With SynapseLink
+from synapselink import SynapseLink
+synapse = SynapseLink()
+synapse.send_message(to="ATLAS", subject="New task", body={"task_id": task_id})
+
+# With SynapseWatcher
+from synapsewatcher import SynapseWatcher
+def check_tasks():
+    tasks = queue.get_pending(assigned_to="ATLAS")
+    if tasks:
+        print(f"{len(tasks)} pending tasks!")
+watcher = SynapseWatcher()
+watcher.add_callback(check_tasks, interval=300)
+
+TIPS
+----
+• Use CRITICAL sparingly - only for true emergencies
+• Add metadata for rich context (GitHub issues, estimates, etc.)
+• Schedule recurring tasks (daily reports, backups, etc.)
+• Check queue at start of session: queue.get_pending(assigned_to="ME")
+• Use fail_task() with reason for debugging
+• Export tasks periodically for analysis
+• Coordinate with team via agent_stats()
+
+TROUBLESHOOTING
+---------------
+• Database locked? Close other connections or wait for retry
+• Can't find tasks? Check agent name (case-sensitive)
+• Scheduled tasks not showing? Use get_scheduled_tasks() for ready tasks
+• Task disappeared? Check status - might be completed/failed
+
+LINKS
+-----
+Full docs: README.md
+Examples: EXAMPLES.md
+GitHub: https://github.com/DonkRonk17/TaskQueuePro
