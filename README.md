@@ -1,3 +1,5 @@
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/cd4c7ddd-a500-44f7-8b45-f49e7cfc54ad" />
+
 # TaskQueuePro v1.0
 
 **Self-Scheduling Task Management for Team Brain**
@@ -539,6 +541,9 @@ pip install .
 ```
 
 ---
+
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/2705f614-c1a3-48d9-b202-e7184e2a20ec" />
+
 
 ## 🤝 **Contributing**
 
